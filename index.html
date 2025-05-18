@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MAHADEV ENGINEERING</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      html {
+        font: 16px/1 "Open Sans", sans-serif;
+        padding: 0.5in;
+        background: #999;
+      }
+      body {
+        position: relative;
+        box-sizing: border-box;
+        height: 10in;
+        width: 8.5in;
+        margin: 0 auto;
+        padding: 0.5in;
+        background: #fff;
+        border-radius: 1px;
+        box-shadow: 0 0 1in -0.25in rgba(0, 0, 0, 0.5);
+      }
+      p {
+        margin: 0;
+      }
+      .text-danger {
+        color: rgb(254 128 0) !important;
+      }
+      *[contenteditable] {
+        border-radius: 0.25em;
+        min-width: 1em;
+        outline: 0;
+        cursor: pointer;
+      }
+      *[contenteditable]:hover,
+      *[contenteditable]:focus {
+        background: #def;
+        box-shadow: 0 0 1em 0.5em #def;
+      }
+      .add,
+      .cut {
+        font-size: 0.8rem;
+        padding: 0.25em 0.5em;
+        text-align: center;
+        float: left;
+        border-radius: 0.5em;
+      }
+      .add {
+        margin: -2.5em 0 0;
+      }
+      .cut {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: -1.5em;
+        transition: opacity 100ms ease-in;
+      }
+      tr:hover .cut {
+        opacity: 1;
+      }
+      .bg-img {
+        position: relative;
+        z-index: 0;
+      }
+      .bg-img::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("./logo.png");
+        background-size: 70%;
+        background-repeat: no-repeat;
+        background-position: center;
+        opacity: 0.05;
+        z-index: -1;
+      }
+      .invoice-content {
+        position: relative;
+        z-index: 1;
+      }
+      .invoice-table {
+        min-height: 400px;
+      }
+      .signature-section {
+        position: absolute;
+        bottom: 40px;
+        right: 40px;
+        text-align: right;
+      }
+      @media print {
+        * {
+          -webkit-print-color-adjust: exact;
+        }
+        html,
+        body {
+          background: none;
+          margin: 0;
+          box-shadow: none;
+        }
+        .add,
+        .cut,
+        button {
+          display: none !important;
+        }
+        .invoice-content table.float-md-end {
+          float: none !important;
+          margin-left: auto;
+        }
+      }
+      .table,
+      .table th,
+      .table td {
+        background-color: transparent !important;
+      }
+      .collapse-row {
+        height: 0px !important;
+        overflow: hidden;
+        /* opacity: 0; */
+        transition: all 0.4s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="row">
+        <div class="col-7">
+          <div>
+            <img src="./logo.png" width="20%" alt="MAHADEV ENGINEERING" />
+          </div>
+          <div><h5 class="text-danger">MAHADEV ENGINEERING</h5></div>
+        </div>
+        <div class="col-5">
+          <address contenteditable>
+            <p>+91-9929168106</p>
+            <p>+91-9828659957</p>
+            <p>mahadevengineeringrk25@gmail.com</p>
+            <p>Railway Station Salawas Jodhpur (342013)</p>
+          </address>
+        </div>
+      </div>
+    </header>
+
+    <hr class="border-bottom border-2 border-dark" />
+
+    <section>
+      <article>
+        <div class="invoice-content">
+          <div class="text-end">
+            <p>Date: <span id="invoiceDate" contenteditable>24/02/2025</span></p>
+          </div>
+          <div class="position-relative bg-img">
+            <table
+              id="invoiceTable"
+              class="table table-bordered table-sm bg-transparent inventory mb-0 mt-4 invoice-table"
+            >
+              <thead class="text-center">
+                <tr>
+                  <th style="width: 5%">S.no.</th>
+                  <th style="width: 38%">Item Description</th>
+                  <th style="width: 12%">Rate</th>
+                  <th style="width: 12%">Quantity</th>
+                  <th style="width: 12%">Price</th>
+                </tr>
+              </thead>
+              <tbody id="invoiceBody">
+                <tr>
+                  <td>
+                    <a
+                      class="cut btn btn-sm btn-danger"
+                      onclick="removeRow(this)"
+                      >-</a
+                    >
+                    <span class="sno">1</span>
+                  </td>
+                  <td contenteditable>Solar Installation and Cleaning</td>
+                  <td contenteditable class="text-end rate">2000.00</td>
+                  <td contenteditable class="text-end qty">1</td>
+                  <td class="text-end price">2000.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <a class="add btn btn-sm btn-primary mt-2" onclick="addRow()">+</a>
+
+          <table class="table table-bordered float-md-end" style="width: 36%">
+            <tr>
+              <th class="bg-light" style="width: 50%">Total</th>
+              <td class="text-end" id="totalAmount">2000.00</td>
+            </tr>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <div class="signature-section">
+      <p class="text-primary" contenteditable>Rajesh</p>
+      <h5 class="text-danger" contenteditable>MAHADEV ENGINEERING</h5>
+    </div>
+
+    <button class="btn btn-primary mt-3" onclick="window.print()">Print</button>
+
+    <script>
+      function updateTotal() {
+        const rows = document.querySelectorAll("#invoiceBody tr");
+        let total = 0;
+        rows.forEach((row, index) => {
+          const rate = parseFloat(row.querySelector(".rate").innerText) || 0;
+          const qty = parseFloat(row.querySelector(".qty").innerText) || 0;
+          const price = (rate * qty).toFixed(2);
+          row.querySelector(".price").innerText = price;
+          row.querySelector(".sno").innerText = index + 1;
+          total += parseFloat(price);
+        });
+        document.getElementById("totalAmount").innerText = total.toFixed(2);
+      }
+
+      function addRow() {
+        const tbody = document.getElementById("invoiceBody");
+        const rows = tbody.querySelectorAll("tr");
+
+        // Collapse last row if exists
+        if (rows.length > 0) {
+          const lastRow = rows[rows.length - 1];
+          lastRow.classList.add("collapse-row");
+        }
+
+        // Create new row
+        const newRow = document.createElement("tr");
+        newRow.innerHTML = `
+    <td><a class="cut btn btn-sm btn-danger" onclick="removeRow(this)">-</a> <span class="sno">1</span></td>
+    <td contenteditable>New Item</td>
+    <td contenteditable class="text-end rate">0.00</td>
+    <td contenteditable class="text-end qty">1</td>
+    <td class="text-end price">0.00</td>
+  `;
+        tbody.appendChild(newRow);
+        updateTotal();
+      }
+
+      function removeRow(button) {
+        const row = button.closest("tr");
+        row.remove();
+        updateTotal();
+      }
+
+      document.addEventListener("input", function (e) {
+        if (
+          e.target.classList.contains("rate") ||
+          e.target.classList.contains("qty")
+        ) {
+          updateTotal();
+        }
+      });
+
+    //   window.onload = updateTotal;
+      window.onload = function () {
+        updateTotal();
+
+        // Set current date
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString("en-GB"); // DD/MM/YYYY
+        document.getElementById("invoiceDate").innerText = formattedDate;
+      };
+    </script>
+  </body>
+</html>
