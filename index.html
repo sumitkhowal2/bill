@@ -11,6 +11,8 @@
       href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
 
     <style>
       html {
@@ -106,6 +108,7 @@
       @media print {
         * {
           -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
         html,
         body {
@@ -131,7 +134,6 @@
       .collapse-row {
         height: 0px !important;
         overflow: hidden;
-        /* opacity: 0; */
         transition: all 0.4s ease;
       }
     </style>
@@ -213,14 +215,18 @@
 
     <div class="signature-section">
       <div class="text-center">
-        <p class=" signature" contenteditable>Rajesh</p>
+        <p class="signature" contenteditable>Rajesh</p>
       </div>
       <h5 class="text-danger" contenteditable>MAHADEV ENGINEERING</h5>
     </div>
 
-    <button class="btn btn-primary mt-3" onclick="window.print()">Print</button>
+    <button class="btn btn-primary mt-3" onclick="downloadPDF()">
+      Generate Bill
+    </button>
 
     <script>
+      const { jsPDF } = window.jspdf;
+
       function updateTotal() {
         const rows = document.querySelectorAll("#invoiceBody tr");
         let total = 0;
@@ -239,13 +245,11 @@
         const tbody = document.getElementById("invoiceBody");
         const rows = tbody.querySelectorAll("tr");
 
-        // Collapse last row if exists
         if (rows.length > 0) {
           const lastRow = rows[rows.length - 1];
           lastRow.classList.add("collapse-row");
         }
 
-        // Create new row
         const newRow = document.createElement("tr");
         newRow.innerHTML = `
     <td><a class="cut btn btn-sm btn-danger" onclick="removeRow(this)">-</a> <span class="sno">1</span></td>
@@ -262,6 +266,82 @@
         const row = button.closest("tr");
         row.remove();
         updateTotal();
+      }
+
+      function downloadPDF() {
+        // Hide interactive elements to match print stylesheet
+        const addBtn = document.querySelector(".add");
+        const cutBtns = document.querySelectorAll(".cut");
+        const printBtn = document.querySelector("button.btn-primary");
+        addBtn.style.display = "none";
+        cutBtns.forEach((btn) => (btn.style.display = "none"));
+        printBtn.style.display = "none";
+
+        // Apply print-specific styles
+        // document.body.style.background = "none";
+        document.body.style.margin = "0";
+        document.body.style.boxShadow = "none";
+        const floatTable = document.querySelector(
+          ".invoice-content table.float-md-end"
+        );
+        if (floatTable) {
+          floatTable.style.float = "none";
+          floatTable.style.marginLeft = "auto";
+        }
+
+        const doc = new jsPDF({
+          orientation: "portrait",
+          unit: "in",
+          format: [8.5, 11],
+        });
+
+        // Use dom-to-image for better CSS rendering
+        domtoimage
+          .toPng(document.body, {
+            quality: 0.95,
+            bgcolor: "#ffffff",
+            width: document.body.scrollWidth,
+            height: document.body.scrollHeight,
+          })
+          .then((imgData) => {
+            const imgWidth = 8.5;
+            const imgHeight =
+              (document.body.scrollHeight * imgWidth) /
+              document.body.scrollWidth;
+            doc.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+            doc.save("Mahadev_Engineering_Invoice.pdf");
+
+            // Restore interactive elements and styles
+            addBtn.style.display = "block";
+            cutBtns.forEach((btn) => (btn.style.display = ""));
+            printBtn.style.display = "block";
+            document.body.style.background = "";
+            document.body.style.margin = "0 auto";
+            document.body.style.boxShadow =
+              "0 0 1in -0.25in rgba(0, 0, 0, 0.5)";
+            if (floatTable) {
+              floatTable.style.float = "";
+              floatTable.style.marginLeft = "";
+            }
+          })
+          .catch((error) => {
+            console.error("Error generating PDF:", error);
+            // Restore elements in case of error
+            addBtn.style.display = "block";
+            cutBtns.forEach((btn) => (btn.style.display = ""));
+            printBtn.style.display = "block";
+            document.body.style.background = "";
+            document.body.style.margin = "0 auto";
+            document.body.style.boxShadow =
+              "0 0 1in -0.25in rgba(0, 0, 0, 0.5)";
+            if (floatTable) {
+              floatTable.style.float = "";
+              floatTable.style.marginLeft = "";
+            }
+            alert(
+              "Failed to generate PDF. Please check the console for errors."
+            );
+          });
       }
 
       document.addEventListener("input", function (e) {
